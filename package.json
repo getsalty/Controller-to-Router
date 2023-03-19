@@ -1,0 +1,15 @@
+{
+  "name": "controller-to-router",
+  "description": "C#, Entity Framework, Controller - converted to - TypeScript, Prisma, TRPC Router",
+  "version": "0.0.1",
+  "author": "Garrett Long",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/getsalty/Controller-to-Router"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "deno run --allow-read --watch --allow-env --allow-sys src/main.ts"
+  }
+}
