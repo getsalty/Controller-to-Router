@@ -154,7 +154,7 @@ const getAdditionalSelectBlocks = () => {
         currentBlockStart &&
         (line.includes(".Add") ||
           line.includes(".SaveChanges") ||
-          line.includes(".Delete"))
+          line.includes(".Remove"))
       ) {
         currentBlockStart = null;
       }

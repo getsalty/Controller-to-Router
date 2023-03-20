@@ -1,4 +1,8 @@
 {
   "deno.enable": true,
-  "deno.unstable": true
+  "deno.unstable": true,
+  "testing.openTesting": "neverOpen",
+  "testing.automaticallyOpenPeekView": "never",
+  "testing.gutterEnabled": false,
+  "testing.followRunningTest": false
 }

@@ -10,6 +10,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "deno run --allow-read --watch --allow-env --allow-sys src/main.ts"
+    "dev": "deno run --allow-read --watch --allow-env --allow-sys src/main.ts",
+    "test": "deno test --allow-read  --watch --import-map=./tests/unit.test.importmap.json  tests/"
   }
 }
