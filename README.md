@@ -10,16 +10,16 @@ Runs using Deno.
 Setup:
 
 1. Install Deno
-2. Create `.env` file in root of directory. Example:
+2. Copy Input file to `input` directory
+3. Create `.env` file in root of directory. Example:
     ```
     FILE_INPUT_NAME=sample.cs
 
     FILE_OUTPUT=true
     FILE_OUTPUT_NAME=sample.ts
     ```
-3. Either run the `dev` script via a package manager (npm, yarn, pnpm), or copy/paste the script into your terminal and run deno directly
-4. For file output, run the `start`
-
+4. Either run the `dev` script via a package manager (npm, yarn, pnpm), or copy/paste the script into your terminal and run deno directly
+5. For file output, run the `start`. The output file will be in the `output` directory
 
 ---------------
 
