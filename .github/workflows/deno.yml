@@ -30,6 +30,11 @@ jobs:
         uses: denoland/setup-deno@9db7f66e8e16b5699a514448ce994936c63f0d54
         with:
           deno-version: v1.x
-
+          
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 18          
+          
       - name: Run tests
-        run: deno test --allow-read --allow-write --unstable --import-map=tests/unit.test.importmap.json
+        run: npm run test:once
