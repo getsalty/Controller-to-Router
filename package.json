@@ -12,6 +12,8 @@
   "scripts": {
     "dev": "deno run --allow-read --allow-write --allow-env --watch --allow-sys src/main.ts dev",
     "start": "deno run --allow-read --allow-write --allow-env --allow-sys src/main.ts",
-    "test": "deno test --allow-read --allow-write --watch --import-map=./tests/unit.test.importmap.json "
+    "test": "deno test --allow-read --allow-write --watch --import-map=./tests/unit.test.importmap.json ",
+    "test:coverage": "deno test --allow-read --allow-write --coverage=cov_profile --import-map=./tests/unit.test.importmap.json ",
+    "test:once": "deno test --allow-read --allow-write --import-map=./tests/unit.test.importmap.json "
   }
 }
