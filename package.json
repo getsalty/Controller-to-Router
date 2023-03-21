@@ -12,6 +12,6 @@
   "scripts": {
     "dev": "deno run --allow-read --allow-write --allow-env --watch --allow-sys src/main.ts dev",
     "start": "deno run --allow-read --allow-write --allow-env --allow-sys src/main.ts",
-    "test": "deno test --allow-read  --watch --import-map=./tests/unit.test.importmap.json  tests/"
+    "test": "deno test --allow-read --allow-write --watch --import-map=./tests/unit.test.importmap.json  tests/ "
   }
 }

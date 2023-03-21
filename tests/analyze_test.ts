@@ -351,6 +351,7 @@ Deno.test("Analyze Data", async (t) => {
             currentBlock.whereClauses[0].value,
             "t.UserTaskOid == userTaskOid"
           );
+          assertEquals(currentBlock.whereClauses[0].lambdaVarible, "t");
         });
       });
 
@@ -389,6 +390,7 @@ Deno.test("Analyze Data", async (t) => {
             currentBlock.whereClauses[0].value,
             "t.UserTaskOid == userTaskOid"
           );
+          assertEquals(currentBlock.whereClauses[0].lambdaVarible, "t");
         });
       });
 
@@ -433,6 +435,7 @@ Deno.test("Analyze Data", async (t) => {
             currentBlock.whereClauses[0].value,
             "t.UserTaskOid == userTaskDetails.UserTaskOid"
           );
+          assertEquals(currentBlock.whereClauses[0].lambdaVarible, "t");
         });
       });
 

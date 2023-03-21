@@ -57,6 +57,7 @@ export type SelectBlock = Block & {
     shortcut: string[];
     property: string[];
     value: string;
+    lambdaVarible?: string;
   }[];
   returnData: { table: string; property: string; value: string }[];
   syntax: LinqSyntax;

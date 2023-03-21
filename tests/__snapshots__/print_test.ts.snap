@@ -1,0 +1,203 @@
+export const snapshot = {};
+
+snapshot[`Print Document 1`] = `
+\`import { v4 as guid } from "uuid";
+  import { z } from "zod";
+  import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+  } from "~/server/api/trpc";
+  import { prisma } from "~/server/db";
+  import { TRPCError } from "@trpc/server";
+  import { logger } from "~/utils/api";
+
+  export const testRouter = createTRPCRouter({
+AddAdmin: publicProcedure
+.input(z.object({
+adminName: AdminNameSchema
+}))
+.mutation(async ({ input }) => {
+const { adminName } = input;
+
+const enc = new Encryptor();
+
+const userOid = guid();
+const encryptedPwd = enc.Encrypt(adminName.Password, userOid);
+
+const user: User = {
+UserOid : userOid,
+UserName : adminName.UserName,
+Email : adminName.LoginEmail,
+Password : encryptedPwd,
+UserStatusId : 100,
+StartDate : new Date(),
+};
+await prisma.user.create({data: user});
+
+const admin: Admin = {
+AdminOid : guid(),
+UserOid : user.UserOid,
+StartDate : new Date(),
+};
+await prisma.admin.create({data: admin});
+
+
+}),
+
+getClientTodoTasks: publicProcedure
+.input(z.object({
+userOid: z.string().uuid()
+}))
+.query(async ({ input }) => {
+const { userOid } = input;
+
+const userTaskData = await prisma.userTask.findMany({
+where: {
+UserOid: userOid,
+},
+include: {
+TaskStatus: true,
+User: true,
+},
+});
+
+const userTask = userTaskData.flatMap(ut => ({
+UserTaskOid: ut.UserTaskOid,
+Name: ut.Name,
+CompleteDate: ut.CompleteDate,
+TaskStatusId: ut.TaskStatusId,
+StartDate: ut.StartDate,
+OrderNumber: ut.OrderNumber,
+UserOid: ut.User.UserOid,
+TaskStatus: ut.TaskStatus.Name,
+})
+);
+
+return userTask;
+).OrderBy(t => t.OrderNumber).ToList();
+}),
+
+GetUserTaskDetails: publicProcedure
+.input(z.object({
+userTaskOid: z.string().uuid()
+}))
+.query(async ({ input }) => {
+const { userTaskOid } = input;
+
+const userTaskData = await prisma.userTask.findUnique({
+where: {
+UserTaskOid: userTaskOid,
+},
+include: {
+TaskStatus: true,
+},
+});
+
+const userTask = {
+UserOid: userTaskData.UserOid,
+UserTaskOid: userTaskData.UserTaskOid,
+Name: userTaskData.Name,
+CompleteDate: userTaskData.CompleteDate,
+TaskStatusId: userTaskData.TaskStatusId,
+StartDate: userTaskData.StartDate,
+OrderNumber: userTaskData.OrderNumber,
+TaskStatus: userTaskData.TaskStatus.Name,
+};
+
+return userTask;
+}),
+
+CompleteTask: publicProcedure
+.input(z.object({
+userTaskOid: z.string().uuid()
+}))
+.mutation(async ({ input }) => {
+const { userTaskOid } = input;
+
+const userTaskData = await prisma.userTask.findUnique({
+where: {
+UserTaskOid: userTaskOid,
+},
+});
+
+const userTask = userTaskData;
+
+if(userTask) {
+userTask.CompleteDate = new Date();
+userTask.TaskStatusId = TaskStatuses.Complete;
+
+}
+}),
+
+AddUpdateUserTask: publicProcedure
+.input(z.object({
+userTaskDetails: UserTaskToAddSchema
+}))
+.mutation(async ({ input }) => {
+const { userTaskDetails } = input;
+
+if(userTaskDetails.UserTaskOid == '00000000-0000-0000-0000-000000000000') {
+AddUserTask(userTaskDetails);
+}
+else  {
+UpdateUserTask(userTaskDetails);
+}
+
+}),
+
+DeleteUserTask: publicProcedure
+.input(z.object({
+userTaskOid: z.string().uuid()
+}))
+.mutation(async ({ input }) => {
+const { userTaskOid } = input;
+
+const userTaskData = await prisma.userTask.findUnique({
+where: {
+UserTaskOid: userTaskOid,
+},
+});
+
+const userTask = userTaskData;
+
+if(userTask) {
+await prisma.userTask.delete({where: { id: userTask}});
+
+}
+}),
+
+});
+
+const UpdateUserTask = async (userTaskDetails: UserTaskToAdd) => {
+
+const userTaskData = await prisma.userTask.findUnique({
+where: {
+UserTaskOid: userTaskDetails.UserTaskOid,
+},
+});
+
+const userTask = userTaskData;
+
+if(userTask) {
+userTask.Name = userTaskDetails.Name;
+userTask.OrderNumber = userTaskDetails.OrderNumber;
+
+}
+};
+
+const AddUserTask = async (userTaskDetails: UserTaskToAdd) => {
+
+const userTask: UserTask = {
+UserTaskOid : guid(),
+UserOid : userTaskDetails.UserOid,
+Name : userTaskDetails.Name,
+OrderNumber : userTaskDetails.OrderNumber,
+StartDate : new Date(),
+TaskStatusId : TaskStatuses.New,
+};
+await prisma.userTask.create({data: userTask});
+
+};
+\`
+`;

@@ -112,20 +112,28 @@ function finalizeResults(result: string[]) {
       result[line] = result[line].replace(" cx.", " await prisma.");
     }
 
-    if (
-      result[line].includes(" await prisma.") &&
-      result[line].includes(".Add(")
-    ) {
-      result[line] = result[line].replace(".Add(", ".create({data: ");
-      result[line] = result[line].replace(")", "})");
-    }
+    if (result[line].includes(" await prisma.")) {
+      const tableIndex =
+        result[line].indexOf(" await prisma.") + " await prisma.".length;
+      const [table] = result[line].slice(tableIndex).split(".");
 
-    if (
-      result[line].includes(" await prisma.") &&
-      result[line].includes(".Remove(")
-    ) {
-      result[line] = result[line].replace(".Remove(", ".delete({where: { id: ");
-      result[line] = result[line].replace(")", "}})");
+      result[line] = result[line].replace(
+        /(await prisma.)\w*./g,
+        `$1${singular(camelCase(table))}.`
+      );
+
+      if (result[line].includes(".Add(")) {
+        result[line] = result[line].replace(".Add(", ".create({data: ");
+        result[line] = result[line].replace(")", "})");
+      }
+
+      if (result[line].includes(".Remove(")) {
+        result[line] = result[line].replace(
+          ".Remove(",
+          ".delete({where: { id: "
+        );
+        result[line] = result[line].replace(")", "}})");
+      }
     }
 
     if (result[line].includes("Guid.NewGuid()")) {
@@ -277,10 +285,6 @@ function processVariableBlock(
 ) {
   const { start, name, dataType } = currentSubBlock;
 
-  // if (name === "userLoggedHistory") {
-  //   console.log("here");
-  // }
-
   if (index === start) {
     result.pop();
     result.push(`const ${name}: ${dataType} = {`);
@@ -385,7 +389,7 @@ function processSelectBlock(
       result.push(`  where: {`);
 
       for (const where of whereClauses) {
-        const { value, shortcut } = where;
+        const { value, shortcut, lambdaVarible } = where;
 
         if (shortcut.length === 1) {
           const isBestTable = bestStartingTable.shortcut === shortcut[0];
@@ -407,10 +411,11 @@ function processSelectBlock(
 
           for (let i = 0; i < shortcut.length; i++) {
             const isBestTable = bestStartingTable.shortcut === shortcut[i];
-            const valueShortcut = isBestTable
-              ? ""
-              : tables.find((table) => table.shortcut === shortcut[i])?.name ??
-                "";
+            const valueShortcut =
+              isBestTable || shortcut[i] === lambdaVarible
+                ? ""
+                : tables.find((table) => table.shortcut === shortcut[i])
+                    ?.name ?? shortcut[i];
             const period = valueShortcut === "" ? "" : ".";
             const p = where.property[i];
             substrings.push(`${valueShortcut}${period}${p}`);
@@ -435,7 +440,7 @@ function processSelectBlock(
           continue;
         }
 
-        result.push(`    ${table.name}: true,`);
+        result.push(`    ${singular(table.name)}: true,`);
       }
 
       result.push(`  },`);
@@ -468,7 +473,7 @@ function processSelectBlock(
 
         result.push(
           `    ${property}: ${shortcut}.${
-            isBestTable ? "" : name
+            isBestTable ? "" : singular(name)
           }${period}${value},`
         );
       }
@@ -487,9 +492,6 @@ function processSelectBlock(
 
     return;
   }
-
-  //   const trimmedLine = line.replace("=", ":").trimStart();
-  //   result.push(`//      ${trimmedLine}`);
 }
 
 const getClassHeader = () => {
@@ -527,12 +529,10 @@ export const printDocument = () => {
     .filter((m) => !isHttpMethodBlock(m))
     .map(printMethodBlock);
 
-  const document = [
-    classHeader,
-    ...httpMethods,
-    classFooter,
-    ...utilityMethods,
-  ].join("\r\n");
+  const document = [classHeader, ...httpMethods, classFooter, ...utilityMethods]
+    .flatMap((l) => l.split("\r\n"))
+    .map((l) => l.trim())
+    .join("\r\n");
 
   return document;
 };

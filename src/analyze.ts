@@ -424,6 +424,11 @@ const attachSelectBlockDetails = () => {
         }
 
         if (block.syntax === "lambda") {
+          const lambdaVarible = line
+            .slice(line.indexOf(".Where(") + 7, line.indexOf(")"))
+            .split("=>")[0]
+            .trim();
+
           const value = line
             .slice(line.indexOf(".Where(") + 7, line.indexOf(")"))
             .split("=>")[1]
@@ -444,6 +449,7 @@ const attachSelectBlockDetails = () => {
               shortcut: localShortcut,
               property: localProperty,
               value,
+              lambdaVarible,
             });
           }
 
