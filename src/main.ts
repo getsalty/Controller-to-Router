@@ -13,6 +13,12 @@ const isDev = Deno.args[0] === "dev";
 
 const main = async () => {
   const configData = await load();
+  const inputFileName = configData.FILE_INPUT_NAME;
+
+  if (!inputFileName) {
+    console.log("Please provide a FILE_INPUT_NAME in .env file");
+    return;
+  }
 
   const input = await Deno.readTextFile(
     `./input/${configData.FILE_INPUT_NAME}`
@@ -36,10 +42,22 @@ const main = async () => {
   // );
 
   const doc = printDocument();
-  console.log(doc);
 
   if (!isDev && configData.FILE_OUTPUT) {
-    await Deno.writeTextFile(`./output/${configData.FILE_OUTPUT_NAME}`, doc);
+    const outputFileName = configData.FILE_OUTPUT_NAME;
+    if (!outputFileName) {
+      console.log("Please provide a FILE_OUTPUT_NAME in .env file");
+      return;
+    }
+
+    await Deno.writeTextFile(`./output/${outputFileName}`, doc);
+
+    console.log(
+      "File generated successfully at path:",
+      `./output/${outputFileName}`
+    );
+  } else {
+    console.log(doc);
   }
 
   // console.log(methodsBlockIndexes[10]);
