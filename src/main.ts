@@ -7,9 +7,16 @@ import {
   isVariableBlock,
 } from "./data.ts";
 import { printDocument, printMethodBlock } from "./print.ts";
+import { load } from "https://deno.land/std@0.180.0/dotenv/mod.ts";
+
+const isDev = Deno.args[0] === "dev";
 
 const main = async () => {
-  const input = await Deno.readTextFile("./input/input2.cs");
+  const configData = await load();
+
+  const input = await Deno.readTextFile(
+    `./input/${configData.FILE_INPUT_NAME}`
+  );
 
   data.lines = input.split("\r\n");
 
@@ -28,7 +35,12 @@ const main = async () => {
   //   )
   // );
 
-  printDocument();
+  const doc = printDocument();
+  console.log(doc);
+
+  if (!isDev && configData.FILE_OUTPUT) {
+    await Deno.writeTextFile(`./output/${configData.FILE_OUTPUT_NAME}`, doc);
+  }
 
   // console.log(methodsBlockIndexes[10]);
   // console.log(data.blocks.filter(isMethodBlock));

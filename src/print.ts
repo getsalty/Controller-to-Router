@@ -534,5 +534,5 @@ export const printDocument = () => {
     ...utilityMethods,
   ].join("\r\n");
 
-  console.log(document);
+  return document;
 };
