@@ -32,4 +32,4 @@ jobs:
           deno-version: v1.x
 
       - name: Run tests
-        run: deno test --allow-read --allow-write --unstable --import-map=./tests/unit.test.importmap.json
+        run: deno test --allow-read --allow-write --unstable --import-map=tests/unit.test.importmap.json
