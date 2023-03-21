@@ -1,5 +1,0 @@
-{
-  "imports": {
-    "../src/data.ts": "./mocks/data.ts"
-  }
-}

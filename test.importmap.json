@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "./src/data.ts": "./tests/mocks/data.ts"
+  }
+}
