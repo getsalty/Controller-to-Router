@@ -17,7 +17,7 @@ Deno.test("Analyze Data", async (t) => {
     analyzeLines();
 
     assertEquals(data.className, "TestController");
-    assertEquals(data.blocks.length, 31);
+    assertEquals(data.blocks.length, 33);
   });
 
   await t.step("Methods", async (method) => {
@@ -29,16 +29,16 @@ Deno.test("Analyze Data", async (t) => {
       assertEquals(nonHttpMethods.length, 2);
 
       assertEquals(nonHttpMethods[0].name, "UpdateUserTask");
-      assertEquals(nonHttpMethods[0].start, 146);
-      assertEquals(nonHttpMethods[0].end, 157);
+      assertEquals(nonHttpMethods[0].start, 154);
+      assertEquals(nonHttpMethods[0].end, 165);
       assertEquals(nonHttpMethods[0].usesContext, true);
       assertEquals(nonHttpMethods[0].variables.length, 1);
       assertEquals(nonHttpMethods[0].variables[0].name, "userTaskDetails");
       assertEquals(nonHttpMethods[0].variables[0].type, "UserTaskToAdd");
 
       assertEquals(nonHttpMethods[1].name, "AddUserTask");
-      assertEquals(nonHttpMethods[1].start, 160);
-      assertEquals(nonHttpMethods[1].end, 175);
+      assertEquals(nonHttpMethods[1].start, 168);
+      assertEquals(nonHttpMethods[1].end, 183);
       assertEquals(nonHttpMethods[1].usesContext, true);
       assertEquals(nonHttpMethods[1].variables.length, 1);
       assertEquals(nonHttpMethods[1].variables[0].name, "userTaskDetails");
@@ -85,7 +85,7 @@ Deno.test("Analyze Data", async (t) => {
 
       assertEquals(postMethods[1].name, "AddUpdateUserTask");
       assertEquals(postMethods[1].start, 119);
-      assertEquals(postMethods[1].end, 129);
+      assertEquals(postMethods[1].end, 137);
       assertEquals(postMethods[1].usesContext, false);
       assertEquals(postMethods[1].variables.length, 1);
       assertEquals(postMethods[1].variables[0].name, "userTaskDetails");
@@ -112,8 +112,8 @@ Deno.test("Analyze Data", async (t) => {
       assertEquals(deleteMethods.length, 1);
 
       assertEquals(deleteMethods[0].name, "DeleteUserTask");
-      assertEquals(deleteMethods[0].start, 133);
-      assertEquals(deleteMethods[0].end, 143);
+      assertEquals(deleteMethods[0].start, 141);
+      assertEquals(deleteMethods[0].end, 151);
       assertEquals(deleteMethods[0].usesContext, true);
       assertEquals(deleteMethods[0].variables.length, 1);
       assertEquals(deleteMethods[0].variables[0].name, "userTaskOid");
@@ -136,8 +136,8 @@ Deno.test("Analyze Data", async (t) => {
     assertEquals(variables[1].dataType, "Admin");
 
     assertEquals(variables[2].name, "userTask");
-    assertEquals(variables[2].start, 164);
-    assertEquals(variables[2].end, 171);
+    assertEquals(variables[2].start, 172);
+    assertEquals(variables[2].end, 179);
     assertEquals(variables[2].dataType, "UserTask");
   });
 
@@ -364,8 +364,8 @@ Deno.test("Analyze Data", async (t) => {
       const currentBlock = selectBlocks[3];
 
       assertEquals(currentBlock.queryType, "Unique");
-      assertEquals(currentBlock.start, 136);
-      assertEquals(currentBlock.end, 136);
+      assertEquals(currentBlock.start, 144);
+      assertEquals(currentBlock.end, 144);
       assertEquals(currentBlock.syntax, "lambda");
       assertEquals(currentBlock.hasReturn, false);
 
@@ -403,8 +403,8 @@ Deno.test("Analyze Data", async (t) => {
       const currentBlock = selectBlocks[4];
 
       assertEquals(currentBlock.queryType, "Unique");
-      assertEquals(currentBlock.start, 149);
-      assertEquals(currentBlock.end, 149);
+      assertEquals(currentBlock.start, 157);
+      assertEquals(currentBlock.end, 157);
       assertEquals(currentBlock.syntax, "lambda");
       assertEquals(currentBlock.hasReturn, false);
 

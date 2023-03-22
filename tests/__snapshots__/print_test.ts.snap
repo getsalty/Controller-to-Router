@@ -1,16 +1,16 @@
 export const snapshot = {};
 
 snapshot[`Print Document 1`] = `
-\`import { v4 as guid } from "uuid";
-  import { z } from "zod";
+"import { v4 as guid } from \\"uuid\\";
+  import { z } from \\"zod\\";
   import {
     createTRPCRouter,
     protectedProcedure,
     publicProcedure,
-  } from "~/server/api/trpc";
-  import { prisma } from "~/server/db";
-  import { TRPCError } from "@trpc/server";
-  import { logger } from "~/utils/api";
+  } from \\"~/server/api/trpc\\";
+  import { prisma } from \\"~/server/db\\";
+  import { TRPCError } from \\"@trpc/server\\";
+  import { logger } from \\"~/utils/api\\";
 
   export const testRouter = createTRPCRouter({
 AddAdmin: publicProcedure
@@ -137,13 +137,24 @@ userTaskDetails: UserTaskToAddSchema
 .mutation(async ({ input }) => {
 const { userTaskDetails } = input;
 
+try
+{
 if(userTaskDetails.UserTaskOid == '00000000-0000-0000-0000-000000000000') {
 AddUserTask(userTaskDetails);
 }
 else  {
 UpdateUserTask(userTaskDetails);
 }
-
+}
+catch ( ex)
+{
+logger.error(ex, \\"Could not login\\");
+const errorMsg = \`Could not login, error: {0}, ex.Message\`;
+throw new TRPCError({
+    code: \\"INTERNAL_SERVER_ERROR\\",
+    message: JSON.stringify(errorMsg),
+  });
+}
 }),
 
 DeleteUserTask: publicProcedure
@@ -199,5 +210,5 @@ TaskStatusId : TaskStatuses.New,
 await prisma.userTask.create({data: userTask});
 
 };
-\`
+\"
 `;

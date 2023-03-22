@@ -175,6 +175,16 @@ function finalizeResults(result: string[]) {
       result[line] = result[line].replace("log.LogError", "logger.error");
     }
 
+    if (result[line].includes("String.Format(")) {
+      result[line] = result[line].replace("String.Format(", "`");
+      result[line] = result[line].replace(");", "`;");
+      result[line] = result[line].replaceAll('"', "");
+    }
+
+    if (result[line].includes("catch (Exception")) {
+      result[line] = result[line].replace("catch (Exception", "catch (");
+    }
+
     const badRequestRegex = /return BadRequest\((.*)\);/;
     if (result[line].match(badRequestRegex)) {
       result[line] = result[line].replace(badRequestRegex, badRequestReplace);

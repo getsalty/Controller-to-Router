@@ -118,15 +118,23 @@ namespace Test.Controllers
         [HttpPost("addUpdateUserTask")]
         public void AddUpdateUserTask(UserTaskToAdd userTaskDetails)
         {
-            if (userTaskDetails.UserTaskOid == Guid.Empty)
+            try
             {
-                AddUserTask(userTaskDetails);
+                if (userTaskDetails.UserTaskOid == Guid.Empty)
+                {
+                    AddUserTask(userTaskDetails);
+                }
+                else
+                {
+                    UpdateUserTask(userTaskDetails);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                UpdateUserTask(userTaskDetails);
+                log.LogError(ex, "Could not login");
+                var errorMsg = String.Format("Could not login, error: {0}", ex.Message);
+                return BadRequest(errorMsg);
             }
-
         }
 
         [HttpDelete("userTask/{userTaskOid}")]
