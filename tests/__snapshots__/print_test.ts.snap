@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`Print Document 1`] = `
+snapshot[`Print Document Input 1 1`] = `
 "import { v4 as guid } from \\"uuid\\";
   import { z } from \\"zod\\";
   import {
@@ -210,5 +210,254 @@ TaskStatusId : TaskStatuses.New,
 await prisma.userTask.create({data: userTask});
 
 };
-\"
+"
+`;
+
+snapshot[`Print Document Input 2 1`] = `
+\`import { v4 as guid } from "uuid";
+  import { z } from "zod";
+  import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+  } from "~/server/api/trpc";
+  import { prisma } from "~/server/db";
+  import { TRPCError } from "@trpc/server";
+  import { logger } from "~/utils/api";
+
+  export const test2Router = createTRPCRouter({
+CreateUploadSession: publicProcedure
+.input(z.object({
+request: UploadSessionRequestSchema
+}))
+.mutation(async ({ input }) => {
+const { request } = input;
+
+
+try
+{
+const result = testSessionService.CreateUploadSession(request.FileName);
+const response = new UploadSessionDto(result);
+return response;
+}
+catch(Exception ex)
+{
+logger.error(ex, "Error creating upload");
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: '',
+  });
+}
+}),
+
+GetUploadSession: publicProcedure
+.input(z.object({
+id: z.string()
+}))
+.query(async ({ input }) => {
+const { id } = input;
+
+if(!Guid.TryPars) {
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+
+try
+{
+const result = testSessionService.GetUploadSession(uid);
+return result == null ? NotFound() : new UploadSessionDto(result);
+}
+catch(Exception ex)
+{
+logger.error(ex, "Error getting upload");
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: '',
+  });
+}
+}),
+
+DeleteUploadSession: publicProcedure
+.input(z.object({
+id: z.string()
+}))
+.mutation(async ({ input }) => {
+const { id } = input;
+
+if(!Guid.TryPars) {
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+
+try
+{
+testSessionService.DeleteUploadSession(uid);
+return;
+}
+catch(Exception ex)
+{
+logger.error(ex, "Error deleting upload");
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: '',
+  });
+}
+}),
+
+FileChunk: publicProcedure
+.mutation(async () => {
+const {  } = input;
+
+try
+{
+if(Request.Form.Files.Count != 1) {
+logger.error("Chunk message had {ActualNumFiles} but can only accept 1", Request.Form.Files.Count);
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+}
+catch ()
+{
+logger.error("Chunk message received without a form file");
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+
+const file = Request.Form.Files[0];
+const chunkUploadIdHeader = Request.Headers["ChunkUploadSessionId"];
+const chunkNumberHeader = Request.Headers["ChunkNumber"];
+const isLastChunkHeader = Request.Headers["IsLastChunk"];
+
+if(!Guid.TryPars) {
+logger.error("Chunk message missing one or more required headers");
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+
+try
+{
+testSessionService.SaveChunk(uid, chunkNumber, file, isLastChunk);
+return;
+}
+catch(Exception ex)
+{
+logger.error(ex, "Error trying to save chunk");
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: '',
+  });
+}
+}),
+
+UploadFile: publicProcedure
+.input(z.object({
+_: z.array(IFormFile)
+}))
+.mutation(async ({ input }) => {
+const { _ } = input;
+
+try
+{
+if(Request.Form.Files.Count != 1) {
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+}
+catch ()
+{
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(),
+  });
+}
+
+const file = Request.Form.Files[0];
+
+if(!IsFileValidUploa) {
+throw new TRPCError({
+    code: "BAD_REQUEST",
+    message: "File has an invalid extension.",
+  });
+}
+
+
+try
+{
+const filePaths = SaveFileToDirectory(file);
+
+const newFileUid = this.libraryDal.AddUploadJob(filePaths[3], this.testFolder);
+
+const result = new FileResult() { FilePaths = filePaths, FileUid = newFileUid };
+return result;
+}
+catch ( ex)
+{testFolderHttp
+throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: JSON.stringify(ex.Message, null, 500),
+  });
+}
+}),
+
+});
+
+const SaveFileToDirectory =  (file: IFormFile) => {
+
+const testFolder = this.libraryDal.GetFolders().FirstOrDefault(x => x.FolderName == "Test");
+if(testFolder == null) {
+throw new Exception("Test directory not found");
+}
+
+const testFolderUnc = testFolder.Unc;
+const testFolderHttp = testFolder.Http;
+if(testFolderUnc is null || testFolderHttp is null) {
+throw new Exception("Test directory's paths not found");
+}
+
+const tempFileNameWithPathUnc = Path.Combine(testFolderUnc, "temp_" + file.FileName);
+const fileNameWithPathUnc = Path.Combine(testFolderUnc, file.FileName);
+
+using (var stream = new FileStream(tempFileNameWithPathUnc, FileMode.Create))
+{
+file.CopyTo(stream);
+}
+
+try
+{
+using (var stream = new FileStream(fileNameWithPathUnc, FileMode.Create))
+{
+file.CopyTo(stream);
+}
+}
+catch ( ex)
+{
+logger.error(ex, "Creating file has failed");
+throw ex;
+}
+finally
+{
+System.IO.File.Delete(tempFileNameWithPathUnc);
+}
+
+return new string[] { fileNameWithPathUnc, Path.Combine(testFolderHttp, file.FileName) };
+};
+
+const IsFileValidUpload =  (file: IFormFile) => {
+
+const fileInfo = new FileInfo(file.FileName);
+return testConfig.FileExtensions.Contains(fileInfo.Extension.ToLower());
+};
+\`
 `;

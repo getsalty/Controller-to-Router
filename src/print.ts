@@ -185,6 +185,19 @@ function finalizeResults(result: string[]) {
       result[line] = result[line].replace("catch (Exception", "catch (");
     }
 
+    const validationProblemRegex = /return ValidationProblem\((.*)\);/;
+    if (result[line].match(validationProblemRegex)) {
+      result[line] = result[line].replace(
+        validationProblemRegex,
+        validationProblemReplace
+      );
+    }
+
+    const problemRegex = /return Problem\((.*)\);/;
+    if (result[line].match(problemRegex)) {
+      result[line] = result[line].replace(problemRegex, problemReplace);
+    }
+
     const badRequestRegex = /return BadRequest\((.*)\);/;
     if (result[line].match(badRequestRegex)) {
       result[line] = result[line].replace(badRequestRegex, badRequestReplace);
@@ -194,7 +207,28 @@ function finalizeResults(result: string[]) {
     if (result[line].match(prismaRegex)) {
       result[line] = result[line].replace(prismaRegex, prismaCreateReplace);
     }
+
+    const okRegex = / Ok\((.*)\)/;
+    if (result[line].match(okRegex)) {
+      result[line] = result[line].replace(okRegex, okCreateReplace);
+    }
   }
+}
+
+function validationProblemReplace(_: string, p1: string) {
+  const message = p1[0] === '"' ? p1 : `JSON.stringify(${p1})`;
+  return `throw new TRPCError({
+    code: "BAD_REQUEST",
+    message: ${p1 ? message : "''"},
+  });`;
+}
+
+function problemReplace(_: string, p1: string) {
+  const message = p1[0] === '"' ? p1 : `JSON.stringify(${p1})`;
+  return `throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: ${p1 ? message : "''"},
+  });`;
 }
 
 function badRequestReplace(_: string, p1: string) {
@@ -208,6 +242,11 @@ function badRequestReplace(_: string, p1: string) {
 function prismaCreateReplace(_: string, p1: string) {
   const single = singular(p1);
   return `await prisma.${camelCase(single)}.create(`;
+}
+
+function okCreateReplace(_: string, p1: string) {
+  const spacer = p1 !== "" ? " " : "";
+  return `${spacer}${p1}`;
 }
 
 const C3toZodMap: Record<string, string> = {
@@ -312,7 +351,17 @@ function processIfBlock(
 ) {
   const { start, end, clause, isElse } = currentSubBlock;
 
+  if (
+    clause.includes("!ModelState.IsValid") ||
+    clause.includes("ModelState.IsValid == false")
+  ) {
+    result.pop();
+    result.push("");
+    return;
+  }
+
   const santitizedClause = clause.replace(" != null", "");
+  const clauseIsPositiveModelValidation = clause.includes("ModelState.IsValid");
 
   if (index === start) {
     result.pop();
@@ -324,11 +373,19 @@ function processIfBlock(
       return;
     }
 
+    if (clauseIsPositiveModelValidation) {
+      return;
+    }
+
     result.push(`if(${santitizedClause}) {`);
     return;
   }
 
   if (index === end) {
+    if (clauseIsPositiveModelValidation) {
+      return;
+    }
+
     result.push(`}`);
     return;
   }

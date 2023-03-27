@@ -8,7 +8,7 @@ import {
   isVariableBlock,
 } from "./mocks/data.ts";
 
-Deno.test("Analyze Data", async (t) => {
+Deno.test("Analyze Data Input 1", async (t) => {
   const input = await Deno.readTextFile("./tests/mocks/input.cs");
 
   data.lines = input.split("\r\n");
@@ -443,5 +443,119 @@ Deno.test("Analyze Data", async (t) => {
         assertEquals(currentBlock.returnData.length, 0);
       });
     });
+  });
+});
+
+Deno.test("Analyze Data Input 2", async (t) => {
+  const input = await Deno.readTextFile("./tests/mocks/input2.cs");
+
+  data.lines = input.split("\r\n");
+
+  await t.step("Analyze Lines", () => {
+    analyzeLines();
+
+    assertEquals(data.className, "Test2Controller");
+    assertEquals(data.blocks.length, 38);
+  });
+
+  await t.step("Methods", async (method) => {
+    const methods = data.blocks.filter(isMethodBlock);
+    assertEquals(methods.length, 7);
+
+    await method.step("General Methods", () => {
+      const nonHttpMethods = methods.filter((block) => block.httpType == null);
+      assertEquals(nonHttpMethods.length, 2);
+
+      assertEquals(nonHttpMethods[0].name, "SaveFileToDirectory");
+      assertEquals(nonHttpMethods[0].start, 189);
+      assertEquals(nonHttpMethods[0].end, 229);
+      assertEquals(nonHttpMethods[0].usesContext, false);
+      assertEquals(nonHttpMethods[0].variables.length, 1);
+      assertEquals(nonHttpMethods[0].variables[0].name, "file");
+      assertEquals(nonHttpMethods[0].variables[0].type, "IFormFile");
+
+      assertEquals(nonHttpMethods[1].name, "IsFileValidUpload");
+      assertEquals(nonHttpMethods[1].start, 232);
+      assertEquals(nonHttpMethods[1].end, 235);
+      assertEquals(nonHttpMethods[1].usesContext, false);
+      assertEquals(nonHttpMethods[1].variables.length, 1);
+      assertEquals(nonHttpMethods[1].variables[0].name, "file");
+      assertEquals(nonHttpMethods[1].variables[0].type, "IFormFile");
+    });
+  });
+
+  await t.step("HTTP Methods", async (http) => {
+    const httpMethods = data.blocks.filter(isHttpMethodBlock);
+    assertEquals(httpMethods.length, 5);
+
+    await http.step("Get", () => {
+      const getMethods = httpMethods.filter((b) => b.httpType === "HttpGet");
+      assertEquals(getMethods.length, 1);
+
+      assertEquals(getMethods[0].name, "GetUploadSession");
+      assertEquals(getMethods[0].start, 65);
+      assertEquals(getMethods[0].end, 81);
+      assertEquals(getMethods[0].usesContext, false);
+      assertEquals(getMethods[0].variables.length, 1);
+      assertEquals(getMethods[0].variables[0].name, "id");
+      assertEquals(getMethods[0].variables[0].type, "string");
+    });
+
+    await http.step("Post", () => {
+      const postMethods = httpMethods.filter((b) => b.httpType === "HttpPost");
+      assertEquals(postMethods.length, 3);
+
+      assertEquals(postMethods[0].name, "CreateUploadSession");
+      assertEquals(postMethods[0].start, 45);
+      assertEquals(postMethods[0].end, 61);
+      assertEquals(postMethods[0].usesContext, false);
+      assertEquals(postMethods[0].variables.length, 1);
+      assertEquals(postMethods[0].variables[0].name, "request");
+      assertEquals(postMethods[0].variables[0].type, "UploadSessionRequest");
+
+      assertEquals(postMethods[1].name, "FileChunk");
+      assertEquals(postMethods[1].start, 106);
+      assertEquals(postMethods[1].end, 142);
+      assertEquals(postMethods[1].usesContext, false);
+      assertEquals(postMethods[1].variables.length, 0);
+
+      assertEquals(postMethods[2].name, "UploadFile");
+      assertEquals(postMethods[2].start, 147);
+      assertEquals(postMethods[2].end, 181);
+      assertEquals(postMethods[2].usesContext, false);
+      assertEquals(postMethods[2].variables.length, 1);
+      assertEquals(postMethods[2].variables[0].name, "_");
+      assertEquals(postMethods[2].variables[0].type, "List<IFormFile>");
+    });
+
+    await http.step("Put", () => {
+      const putMethods = httpMethods.filter((b) => b.httpType === "HttpPut");
+      assertEquals(putMethods.length, 0);
+    });
+
+    await http.step("Delete", () => {
+      const deleteMethods = httpMethods.filter(
+        (b) => b.httpType === "HttpDelete"
+      );
+      assertEquals(deleteMethods.length, 1);
+
+      assertEquals(deleteMethods[0].name, "DeleteUploadSession");
+      assertEquals(deleteMethods[0].start, 85);
+      assertEquals(deleteMethods[0].end, 101);
+      assertEquals(deleteMethods[0].usesContext, false);
+      assertEquals(deleteMethods[0].variables.length, 1);
+      assertEquals(deleteMethods[0].variables[0].name, "id");
+      assertEquals(deleteMethods[0].variables[0].type, "string");
+    });
+  });
+
+  await t.step("Variables", () => {
+    const variables = data.blocks.filter(isVariableBlock);
+    assertEquals(variables.length, 0);
+  });
+
+  await t.step("Select Blocks", () => {
+    const selectBlocks = data.blocks.filter(isSelectBlock);
+    assertEquals(selectBlocks.length, 0);
   });
 });
